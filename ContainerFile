@@ -1,0 +1,19 @@
+FROM centos
+LABEL description="Squid Proxy Server in a container"
+
+ENV SQUID_CACHE_DIR=/var/spool/squid \
+    SQUID_LOG_DIR=/var/log/squid
+
+RUN yum install -y squid && yum clean all
+RUN mkdir -p ${SQUID_CACHE_DIR} && mkdir -p ${SQUID_LOG_DIR}
+RUN chgrp -R 0 ${SQUID_CACHE_DIR} && \
+   chmod -R g=u ${SQUID_CACHE_DIR} && \
+   chgrp -R 0 ${SQUID_LOG_DIR} && \
+   chmod -R g=u ${SQUID_LOG_DIR} && \
+   chgrp -R 0 /var/run && \
+   chmod -R g=u /var/run
+COPY entrypoint.sh /sbin/entrypoint.sh
+RUN chmod 755 /sbin/entrypoint.sh
+
+EXPOSE 3128/tcp
+ENTRYPOINT ["/sbin/entrypoint.sh"]

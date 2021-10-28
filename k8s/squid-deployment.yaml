@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squidinkube
+  namespace: pam
+spec:
+  selector:
+    matchLabels:
+      app: squid
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: squid
+    spec:
+      containers:
+        - name: squid
+          image: >-
+            quay.io/markd/squidinkube:v3
+          ports:
+            - containerPort: 3128
+          volumeMounts:
+          - mountPath: /etc/squid/squid.conf
+            name: squidconfig
+            subPath: squid.conf
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: squid.conf
+            path: squid.conf
+          name: squidconfig
+        name: squidconfig
