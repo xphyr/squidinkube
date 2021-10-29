@@ -34,7 +34,7 @@ acl CONNECT method CONNECT
 http_access deny !Safe_ports
 
 # Deny CONNECT to other than secure SSL ports
-http_access deny CONNECT !SSL_ports
+http_access deny CONNECT !SSL_ports !Safe_ports
 
 # Only allow cachemgr access from localhost
 http_access allow localhost manager
@@ -83,4 +83,17 @@ acl local-network dst 172.0.0.0/8 10.0.0.0/8
 cache_peer <upstream proxy goes here> parent <upstream proxy port goes here> 0 no-query default
 cache_peer_domain <upstream proxy goes here> !.svc.cluster.local
 never_direct deny local-servers local-network
+never_direct allow all
+
+#
+# Configure squid to use upstream proxy for external sites
+# Bypass for all addresses in cluster
+acl local-servers dstdomain .svc.cluster.local
+acl local-network172 dst 172.30.0.0/16 
+acl local-network10 dst 10.0.0.0/8
+cache_peer <upstream proxy goes here> parent <upstream proxy port goes here> 0 no-query default
+always_direct allow local-servers 
+always_direct allow local-network172 
+always_direct allow local-network10
+never_direct deny local-servers local-network172 local-network10
 never_direct allow all
